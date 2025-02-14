@@ -36,3 +36,6 @@ nodes:
     protocol: tcp
 
 - role: worker
+networking:
+  disableDefaultCNI: true
+  podSubnet: 172.22.0.0/24
