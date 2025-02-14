@@ -20,7 +20,7 @@ function install_cluster_1master_2workers() {
 	kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico.yaml
 }
 function delete_kind_stop_all_container() {
-	kind delete cluster
+	kind delete cluster --name dev
 	docker stop $(docker ps -a -q) 
 	docker rm $(docker ps -a -q)
 	docker ps -a
