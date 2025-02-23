@@ -17,6 +17,8 @@ function get_ip_address() {
 }
 function install_cluster_1master_2workers() {
 	kind create cluster --config kind-three-node-cluster.yaml --name dev
+}
+function install_calico() {
 	kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/calico.yaml
 }
 function delete_kind_stop_all_container() {
@@ -49,6 +51,8 @@ function print_help() {
    Install kind cluster with calico
 -D
    Delete kind cluster and stop all containers
+-C
+   Install Calico
 -h
    Print this help"
 }
@@ -66,6 +70,10 @@ function main() {
        -D | --delete)
 		echo "Delete kind cluster and stop all containers"
 		delete_kind_stop_all_container
+            exit 1;;
+       -C | --calico)
+                echo "Delete kind cluster and stop all containers"
+                install_calico
             exit 1;;
        -h | --help)
             print_help
