@@ -3,9 +3,6 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
-  extraMounts:
-  - hostPath: /home/luis/docker_open5gs
-    containerPath: /docker_open5gs
   kubeadmConfigPatches:
       - |
         kind: KubeletConfiguration
@@ -62,6 +59,11 @@ nodes:
     listenAddress: "0.0.0.0"
     protocol: sctp
 - role: worker
+  extraMounts:
+  - hostPath: /home/luis/k8s_open5gs
+    containerPath: /k8s_open5gs
+  - hostPath: /dev
+    containerPath: /dev
   kubeadmConfigPatches:
       - |
         kind: KubeletConfiguration
