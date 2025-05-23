@@ -18,32 +18,32 @@ function get_ip_address() {
 function install_cluster_1master_1workers() {
 	kind create cluster --config kind-two-nodes-cluster.yaml --name dev
 }
-function install_multus() {
-	kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
-	# Control plane node configuration
-	docker exec -it dev-control-plane ip link add br-net1 type bridge || true
-	docker exec -it dev-control-plane ip addr add 192.168.1.1/24 dev br-net1 || true
-	docker exec -it dev-control-plane ip link set br-net1 up
-	docker exec -it dev-control-plane sysctl -w net.ipv4.ip_forward=1
-	docker exec -it dev-control-plane iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE #configuration of cidr
-	# Download on the CNI plugins on the host
-	cd ~
-	curl -LO https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-amd64-v1.4.0.tgz
-        tar -xzf cni-plugins-linux-amd64-v1.4.0.tgz
-	# Copy plugins into control plane node
-        docker cp ~/bridge dev-control-plane:/opt/cni/bin/
-        docker cp ~/host-local dev-control-plane:/opt/cni/bin/
-        docker cp ~/loopback dev-control-plane:/opt/cni/bin/
-	# Worker node configuration
-	docker exec -it dev-worker ip link add br-net1 type bridge || true
-	docker exec -it dev-worker ip addr add 192.168.1.1/24 dev br-net1 || true
-	docker exec -it dev-worker ip link set br-net1 up
-	docker exec -it dev-worker sysctl -w net.ipv4.ip_forward=1
-	docker exec -it dev-worker iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE #configuration of cidr
-	# Copy plugins into worker node
-	docker cp ~/bridge dev-worker:/opt/cni/bin/
-        docker cp ~/host-local dev-worker:/opt/cni/bin/
-        docker cp ~/loopback dev-worker:/opt/cni/bin/
+function install_multus() {      
+  # Apply Multus
+  kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset.yml
+
+  # Control-plane bridge configuration
+  docker exec dev-control-plane ip link add br-net1 type bridge || true
+  docker exec dev-control-plane ip addr add 192.168.1.1/24 dev br-net1 || true
+  docker exec dev-control-plane ip link set br-net1 up
+  docker exec dev-control-plane sysctl -w net.ipv4.ip_forward=1
+  docker exec dev-control-plane iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE
+
+  # Download and install CNI plugins in control-plane
+  docker exec dev-control-plane sh -c "curl -LO https://github.com/containernetworking/plugins/releases/download/v1.7.1/cni-plugins-linux-amd64-v1.7.1.tgz && \
+    tar -xzf cni-plugins-linux-amd64-v1.7.1.tgz -C /opt/cni/bin && rm cni-plugins-linux-amd64-v1.7.1.tgz"
+
+  # Worker bridge configuration
+  docker exec dev-worker ip link add br-net1 type bridge || true
+  docker exec dev-worker ip addr add 192.168.1.1/24 dev br-net1 || true
+  docker exec dev-worker ip link set br-net1 up
+  docker exec dev-worker sysctl -w net.ipv4.ip_forward=1
+  docker exec dev-worker iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE
+
+  # Download and install CNI plugins in worker
+  docker exec dev-worker sh -c "curl -LO https://github.com/containernetworking/plugins/releases/download/v1.7.1/cni-plugins-linux-amd64-v1.7.1.tgz && \
+    tar -xzf cni-plugins-linux-amd64-v1.7.1.tgz -C /opt/cni/bin && rm cni-plugins-linux-amd64-v1.7.1.tgz"
+
 }
 function delete_kind_stop_all_container() {
 	kind delete cluster --name dev
