@@ -1,0 +1,24 @@
+# Creating the bridge-net network attachement definition
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: bridge-net
+  namespace: k8s-open5gs
+spec:
+  config: '{
+    "cniVersion": "0.3.1",
+    "type": "bridge",
+    "bridge": "br-net1",
+    "ipam": {
+      "type": "host-local",
+      "subnet": "192.168.1.0/24",
+      "rangeStart": "192.168.1.2",
+      "rangeEnd": "192.168.1.100",
+      "routes": [
+        { "dst": "0.0.0.0/0" }
+      ],
+      "gateway": "192.168.1.1"
+    },
+    "isGateway": true,
+    "ipMasq": true
+  }'
