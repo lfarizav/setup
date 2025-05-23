@@ -27,12 +27,13 @@ function install_multus() {
 	docker exec -it dev-control-plane sysctl -w net.ipv4.ip_forward=1
 	docker exec -it dev-control-plane iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE #configuration of cidr
 	# Download on the CNI plugins on the host
+	cd /tmp
 	curl -LO https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-amd64-v1.4.0.tgz
         tar -xzf cni-plugins-linux-amd64-v1.4.0.tgz
 	# Copy plugins into control plane node
-        docker cp bridge dev-control-plane:/opt/cni/bin/
-        docker cp host-local dev-control-plane:/opt/cni/bin/
-        docker cp loopback dev-control-plane:/opt/cni/bin/
+        docker cp /tmp/bridge dev-control-plane:/opt/cni/bin/
+        docker cp /tmp/host-local dev-control-plane:/opt/cni/bin/
+        docker cp /tmp/loopback dev-control-plane:/opt/cni/bin/
 	# Worker node configuration
 	docker exec -it dev-worker ip link add br-net1 type bridge || true
 	docker exec -it dev-worker ip addr add 192.168.1.1/24 dev br-net1 || true
@@ -40,9 +41,9 @@ function install_multus() {
 	docker exec -it dev-worker sysctl -w net.ipv4.ip_forward=1
 	docker exec -it dev-worker iptables -t nat -A POSTROUTING -s 192.168.1.0/24 ! -o br-net1 -j MASQUERADE #configuration of cidr
 	# Copy plugins into worker node
-	docker cp bridge dev-worker:/opt/cni/bin/
-        docker cp host-local dev-worker:/opt/cni/bin/
-        docker cp loopback dev-worker:/opt/cni/bin/
+	docker cp /tmp/bridge dev-worker:/opt/cni/bin/
+        docker cp /tmp/host-local dev-worker:/opt/cni/bin/
+        docker cp /tmp/loopback dev-worker:/opt/cni/bin/
 }
 function delete_kind_stop_all_container() {
 	kind delete cluster --name dev
