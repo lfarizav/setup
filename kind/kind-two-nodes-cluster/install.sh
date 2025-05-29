@@ -43,12 +43,15 @@ function install_multus() {
   # Download and install CNI plugins in worker
   docker exec dev-worker sh -c "curl -LO https://github.com/containernetworking/plugins/releases/download/v1.7.1/cni-plugins-linux-amd64-v1.7.1.tgz && \
     tar -xzf cni-plugins-linux-amd64-v1.7.1.tgz -C /opt/cni/bin && rm cni-plugins-linux-amd64-v1.7.1.tgz"
-echo "Kubectl namespace k8s-open5gs is going to be default in the cluster after Multus was installed"
-k config set-context --current --namespace=k8s-open5gs
+echo "Multus was installed successfully on kubernetes"
+
 }
 function delete_kind_stop_all_container() {
 	kind delete cluster --name dev
 	docker ps -a
+}
+function k8s-open5s-default-namespace() {
+  kubectl config set-context --current --namespace=k8s-open5gs
 }
 function install_kind_ubuntu() {
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.26.0/kind-linux-amd64
@@ -77,7 +80,9 @@ function print_help() {
 -M
    Install Multus
 -h
-   Print this help"
+   Print this help
+-n 
+   Default namespace"
 }
 function main() {
 
@@ -100,6 +105,9 @@ function main() {
             exit 1;;
        -h | --help)
             print_help
+            exit 1;;
+       -n | --defaultnamespace)
+            k8s-open5s-default-namespace
             exit 1;;
         *)
             print_help
