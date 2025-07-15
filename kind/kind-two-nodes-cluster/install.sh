@@ -74,7 +74,7 @@ echo_info()    { cecho "$*" $blue         ;}
 function print_help() {
   echo_info "This script installs kind and more...
 -I
-   Install kind cluster with Multus
+   Install kind cluster of two nodes (1 master, 1 worker)
 -D
    Delete kind cluster and stop all containers
 -M
